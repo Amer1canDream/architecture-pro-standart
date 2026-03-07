@@ -1,0 +1,19 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title C4 Context Diagram — Открытие депозитов онлайн
+
+Person(customer, "Клиент банка", "Использует интернет-банк для открытия депозита онлайн")
+
+
+System(internetBank, "Банковская система")
+System(smsGateway, "СМС-шлюз")
+System(callCenter, "Колл центр")
+
+Rel(customer, internetBank, "Открывает депозит онлайн, подаёт заявку, подписывает/подтверждает действия")
+Rel(customer, callCenter, "Обращается за консультацией по депозиту")
+
+Rel(internetBank, smsGateway, "Инициирует отправку SMS/ведомлений", "Внутренняя интеграция")
+Rel(callCenter, internetBank, "Доступ к информации о клиентах и депозитах", "Внутренняя интеграция")
+
+@enduml

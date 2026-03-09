@@ -1,0 +1,35 @@
+@startuml
+title Процесс выдачи кредита
+
+actor "Клиент" as Client
+participant "Фронт офис" as FrontOffice
+participant "АБС" as ABS
+participant "Кредитный конвеер" as Conveyor
+participant "Кредитный департамент" as CreditDept
+participant "Система скоринга" as Scoring
+participant "Бюро кредитных историй" as CreditHistory
+
+Client -> FrontOffice : Приходит за кредитом
+
+FrontOffice -> ABS : Создает заявку на кредит
+
+ABS -> Conveyor : Отправляет заявку на верификацию
+
+Conveyor -> CreditDept : Отправляет заявку на проверку
+
+CreditDept -> Scoring : Запрашивает скоринг клиента
+
+Scoring -> CreditHistory : Запрашивает кредитную историю
+
+CreditHistory --> Scoring : Результат кредитной истории
+
+Scoring --> CreditDept : Результат скоринга
+CreditDept -> Conveyor : Отправляет результат проверки
+
+Conveyor -> ABS : Отправляет решение по заявке
+
+ABS -> FrontOffice : Отправляет решение
+
+FrontOffice -> Client : Уведомляет о решении
+
+@enduml

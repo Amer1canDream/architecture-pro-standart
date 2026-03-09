@@ -1,0 +1,18 @@
+@startuml Standart Bank System Context Diagram
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context Diagram for rates providing to the call center
+
+Person(user, "Пользователь", "Взаимодействует с системой банка через мобильное приложение и веб-приложение, а также обращается в колл-центр для уточнения ставок")
+
+System(system, "Банк")
+
+System_Ext(callCenter, "Колл-центр")
+System_Ext(smsGateway, "смс провайдер")
+
+Rel(user, system, "Использует", "Веб сайт и мобильное приложение")
+Rel(user, callCenter, "Звонит", "Пытаетс узнать ставки по депозитам")
+Rel(callCenter, system, "Получает информацию о ставках по депозитам", "Внутренняя интеграция")
+Rel(system, smsGateway, "Отправляет уведомления о ставках", "Внутренняя интеграция")
+
+@enduml

@@ -1,0 +1,34 @@
+@startuml
+title Открытие депозита через Фронт офис
+
+actor "Клиент" as Client
+participant "Фронт офис" as FrontOffice
+participant "Бэк офис" as BackOffice
+participant "Кредитный департамент" as CreditDept
+participant "АБС" as ABS
+Client -> FrontOffice : Приходит офис и спрашивает о возможности открыть депозит
+
+FrontOffice -> BackOffice : Проверить возможность открытия депозита
+
+BackOffice -> CreditDept : Запросить данные клиента для расчета ставки
+
+CreditDept -> ABS : Запросить данные клиента для расчета ставки
+
+ABS --> CreditDept : данные клиента
+
+CreditDept -> BackOffice : рассчитать ставку
+
+BackOffice -> FrontOffice : предложить ставку клиенту
+
+FrontOffice -> Client : предложить ставку
+
+Client -> FrontOffice : принимает или отказывается от предложения
+
+alt accepted
+    FrontOffice -> ABS : открыть депозит
+    ABS --> FrontOffice : депозит открыт
+else rejected
+    FrontOffice -> Client : информировать об отказе
+end
+
+@enduml

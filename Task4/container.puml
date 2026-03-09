@@ -1,0 +1,84 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title C4 Container Diagram — Сервис ставок
+
+Person(customer, "Пользвоатель")
+
+System(mobileApp, "Мобильное приложение")
+System(webApp, "Веб-приложение")
+
+System(callCenter, "Колл-центр")
+System(callCenterPartner, "Партнерский колл-центр")
+
+System(sftpServer, "SFTP-сервер", "Сервер для обмена файлами с партнерами")
+
+System_Boundary(bank,"Банк") {
+    Container(globalGateway, "global Gateway", "", "Маршрутизация и балансировка нагрузки между дата-центрами")
+
+    Boundary(dc1, "DC1") {
+        Container(apiGateway1, "API Gateway", "", "")
+        Container(webBff1, "Web BFF", "", "")
+        Container(mobileBff1, "Mobile BFF", "", "")
+        Container(ratesService1, "Rates Service", "", "")
+        ContainerQueue(queue1, "Message Queue", "", "")
+        ContainerDb(ratesDb1, "Rates DB", "", "")
+        System_Boundary(absSys1, "ABS") {
+            Container(abs1, "ABS", "", "Система ABS банка") 
+            ContainerDb(absDb1, "ABS DB", "", "")
+        }
+    }
+
+    Boundary(dc2, "DC2 - резерв") {
+        Container(apiGateway2, "API Gateway", "", "")
+        Container(webBff2, "Web BFF", "", "")
+        Container(mobileBff2, "Mobile BFF", "", "")
+        Container(ratesService2, "Rates Service", "", "")
+        ContainerQueue(queue2, "Message Queue", "", "")
+        ContainerDb(ratesDb2, "Rates DB", "", "")
+        System_Boundary(absSys2, "ABS") {
+            Container(abs2, "ABS", "", "Система ABS банка") 
+            ContainerDb(absDb2, "ABS DB", "", "")
+            
+        }
+    }
+}
+
+Rel(customer, mobileApp, "")
+Rel(customer, webApp, "")
+
+Rel(mobileApp, globalGateway, "HTTPS")
+Rel(webApp, globalGateway, "HTTPS")
+Rel(globalGateway, apiGateway1, "HTTP")
+
+Rel(globalGateway, apiGateway2, "HTTP")
+Rel(apiGateway1, webBff1, "HTTP")
+Rel(apiGateway1, mobileBff1, "HTTP")
+
+Rel(apiGateway2, webBff2, "HTTP")
+Rel(apiGateway2, mobileBff2, "HTTP")
+
+Rel(webBff1, ratesService1, "HTTP")
+Rel(mobileBff1, ratesService1, "HTTP")
+Rel(webBff2, ratesService2, "HTTP")
+Rel(mobileBff2, ratesService2, "HTTP")
+Rel(ratesService1, ratesDb1, "JDBC")
+Rel(ratesService2, ratesDb2, "JDBC")
+
+Rel(ratesService1, queue1, "AMQP")
+Rel(ratesService2, queue2, "AMQP")
+Rel(queue1, abs1, "AMQP")
+Rel(queue2, abs2, "AMQP")
+Rel(abs1, absDb1, "JDBC")
+Rel(abs2, absDb2, "JDBC")
+
+Rel(callCenter, globalGateway, "HTTPS")
+Rel(callCenterPartner, sftpServer, "SFTP")
+Rel(ratesService1, sftpServer, "SFTP", "Отправка ставок")
+Rel(ratesService2, sftpServer, "SFTP", "Отправка ставок")
+
+Rel(ratesDb1, ratesDb2, "Репликация", "Репликация данных между дата-центрами")
+Rel(ratesDb2, ratesDb1, "Репликация", "Репликация данных между дата-центрами")
+Rel(absDb1, absDb2, "Репликация", "Репликация данных между дата-центрами")
+Rel(absDb2, absDb1, "Репликация", "Репликация данных между дата-центрами")
+@enduml

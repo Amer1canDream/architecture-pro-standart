@@ -1,0 +1,116 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title C4 Container Diagram — Онлайн-подача заявки на кредит
+
+Person(customer, "Клиент")
+System_Ext(creditOfficer, "Сотрудник кредитного подразделения")
+System_Ext(telecom, "Телеком-оператор")
+System_Ext(bki, "Бюро кредитных историй")
+
+System(site, "Сайт", "")
+System(mobileApp, "Мобильное приложение", "")
+
+System_Boundary(bank, "Банк") {
+
+    Container(globalGateway, "Глобальный шлюз", "", "Маршрутизация и балансировка нагрузки между дата-центрами")
+
+    Boundary(dc1, "DC1") {
+        Container(apiGateway1, "API Gateway", "", "")
+        Container(webBff1, "Web BFF", "", "")
+        Container(mobileBff1, "Mobile BFF", "", "")
+        Container(creditService1, "Credit Service", "", "")
+        Container(statusService1, "Status Service", "", "")
+        ContainerDb(appDb1, "Credit DB", "", "")
+        ContainerQueue(queue1, "Message Queue", "", "")
+        Container(sms1, "SMS Gateway", "", "")
+        Container(conveyor1, "Credit Conveyor", "", "")
+        Container(scoring1, "Scoring Service", "", "")
+
+        System_Boundary(absBoundary1, "ABS") {
+            Container(absLogic1, "ABS", "", "")
+            ContainerDb(absDb1, "ABS Database", "", "")
+        }
+    }
+
+    Boundary(dc2, "DC2 - Резерв") {
+        Container(apiGateway2, "API Gateway", "", "")
+        Container(webBff2, "Web BFF", "", "")
+        Container(mobileBff2, "Mobile BFF", "", "")
+        Container(creditService2, "Credit Service", "", "")
+        Container(statusService2, "Status Service", "", "")
+        ContainerDb(appDb2, "Credit DB", "", "")
+        ContainerQueue(queue2, "Message Queue", "", "")
+        Container(sms2, "SMS Gateway (Reserve)", "", "")
+        Container(conveyor2, "Credit Conveyor (Reserve)", "", "")
+        Container(scoring2, "Scoring Service (Reserve)", "", "")
+
+        System_Boundary(absBoundary2, "ABS (Reserve)") {
+            Container(absLogic2, "ABS", "", "")
+            ContainerDb(absDb2, "ABS Database", "", "")
+        }
+    }
+}
+
+Rel(customer, site, "Использует")
+Rel(customer, mobileApp, "Использует")
+
+Rel(site, globalGateway, "")
+Rel(mobileApp, globalGateway, "")
+
+Rel(globalGateway, apiGateway1, "")
+Rel(globalGateway, apiGateway2, "")
+
+Rel(apiGateway1, webBff1, "")
+Rel(apiGateway1, mobileBff1, "")
+Rel(apiGateway2, webBff2, "")
+Rel(apiGateway2, mobileBff2, "")
+
+Rel(webBff1, creditService1, "")
+Rel(mobileBff1, creditService1, "")
+Rel(webBff1, statusService1, "")
+Rel(mobileBff1, statusService1, "")
+
+Rel(creditService1, appDb1, "")
+Rel(statusService1, appDb1, "")
+Rel(creditService1, queue1, "")
+Rel(creditService1, sms1, "")
+Rel(queue1, conveyor1, "")
+Rel(conveyor1, scoring1, "")
+Rel(scoring1, bki, "Запрос кредитной истории")
+Rel(scoring1, absLogic1, "Получение данных клиента")
+Rel(conveyor1, absLogic1, "Фиксация результата / банковые данные")
+Rel(absLogic1, absDb1, "")
+
+Rel(sms1, telecom, "Отправка SMS")
+Rel(creditOfficer, conveyor1, "Обработка заявки")
+
+Rel(webBff2, creditService2, "")
+Rel(mobileBff2, creditService2, "")
+Rel(webBff2, statusService2, "")
+Rel(mobileBff2, statusService2, "")
+
+Rel(creditService2, appDb2, "")
+Rel(statusService2, appDb2, "")
+Rel(creditService2, queue2, "")
+Rel(creditService2, sms2, "")
+Rel(queue2, conveyor2, "")
+Rel(conveyor2, scoring2, "")
+Rel(scoring2, bki, "Запрос кредитной истории")
+Rel(scoring2, absLogic2, "Получение данных клиента")
+Rel(conveyor2, absLogic2, "Фиксация результата / банковые данные")
+Rel(absLogic2, absDb2, "")
+
+Rel(sms2, telecom, "Отправка SMS")
+Rel(creditOfficer, conveyor2, "Обработка заявки")
+
+Rel(queue1, queue2, "Репликация")
+Rel(queue2, queue1, "Репликация")
+
+Rel(appDb1, appDb2, "Репликация")
+Rel(appDb2, appDb1, "Репликация")
+
+Rel(absDb1, absDb2, "Репликация")
+Rel(absDb2, absDb1, "Репликация")
+
+@enduml

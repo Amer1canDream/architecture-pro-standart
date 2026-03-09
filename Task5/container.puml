@@ -1,0 +1,69 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title C4 Container Diagram — Онлайн-подача заявки на кредит
+
+Person(customer, "Клиент")
+Person(creditOfficer, "Сотрудник кредитного подразделения")
+
+System_Ext(web, "Интернет-банк", "")
+System_Ext(mobile, "Мобильный банк", "")
+System_Ext(abs, "АБС", "")
+System_Ext(conveyor, "Кредитный конвейер", "")
+System_Ext(scoring, "Система кредитного скоринга", "")
+System_Ext(bki, "Бюро кредитных историй", "")
+System_Ext(smsGateway, "СМС-шлюз", "")
+System_Ext(telecom, "Телеком-оператор", "")
+
+System_Boundary(onlineCredit, "Онлайн-кредитование") {
+    Container(apiGateway, "API Gateway", "", "")
+    Container(globalGateway, "Global Gateway", "", "")
+    Container(webBff, "Web BFF", "", "")
+    Container(mobileBff, "Mobile BFF", "", "")
+    Container(creditService, "Credit Service", "", "")
+    Container(statusService, "Credit Status Service", "", "")
+    Container(notificationService, "Notification Service", "", "")
+    Container(conveyorAdapter, "Credit Conveyor Adapter", "", "")
+    ContainerQueue(queue, "Message Queue", "", "")
+    ContainerDb(appDb, "Application DB", "", "")
+}
+
+Rel(customer, web, "HTTPS")
+Rel(web, globalGateway, "HTTPS")
+
+Rel(customer, mobile, "HTTPS")
+Rel(mobile, globalGateway, "HTTPS")
+
+
+Rel(globalGateway, webBff, "")
+Rel(globalGateway, mobileBff, "")
+
+Rel(webBff, creditService, "")
+Rel(mobileBff, creditService, "")
+
+Rel(webBff, statusService, "")
+Rel(mobileBff, statusService, "")
+
+Rel(applicationService, appDb, "Ч")
+Rel(statusService, appDb, "")
+
+Rel(applicationService, notificationService, "")
+Rel(notificationService, smsGateway, "")
+Rel(smsGateway, telecom, "")
+
+Rel(applicationService, queue, "")
+Rel(queue, conveyorAdapter, "")
+Rel(conveyorAdapter, conveyor, "")
+
+Rel(conveyor, conveyorAdapter, "")
+Rel(conveyorAdapter, queue, "")
+Rel(queue, statusService, "")
+
+Rel(conveyor, scoring, "")
+Rel(scoring, bki, "")
+Rel(scoring, abs, "")
+
+Rel(creditOfficer, conveyor, "")
+Rel(conveyor, abs, "")
+
+@enduml

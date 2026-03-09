@@ -1,0 +1,33 @@
+@startuml
+title Открытие депозита через Call Center --- Предварительно одобренный клиент
+
+actor "Клиент" as Client
+participant "Колл-центр" as CallCenter
+participant "АБС" as ABS
+participant "Бэк офис" as BackOffice
+participant "СМС гейтвей" as SMS
+participant "Фронт офис" as FrontOffice
+
+Client -> CallCenter : Звонит и спрашивает о возможности открыть депозит
+
+CallCenter -> ABS : проверяет клиента на наличие предварительного одобрения
+
+ABS -> BackOffice : получает информацию о клиенте и его статусе
+
+BackOffice -> ABS : клиент имеет предварительное одобрение
+
+ABS -> SMS : отправляет предложение по депозиту клиенту
+
+SMS -> Client : предлагает открыть депозит с определенной ставкой
+
+Client -> CallCenter : принимает или отклоняет предложение
+
+alt rate accepted
+    CallCenter -> FrontOffice : > информирует о принятии предложения
+    FrontOffice -> ABS : открывает депозит для клиента
+    ABS --> FrontOffice : депозит открыт
+else rate rejected
+    CallCenter -> Client : уведомляет об отклонении
+end
+
+@enduml
